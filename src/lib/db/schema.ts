@@ -135,6 +135,7 @@ export const papers = pgTable("paper", {
     sections: { heading: string; body: string }[];
   }>(),
   markdown: text("markdown"),
+  model: text("model"),
   generatedAt: timestamp("generated_at", { mode: "date" })
     .defaultNow()
     .notNull(),

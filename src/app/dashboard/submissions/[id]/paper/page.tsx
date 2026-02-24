@@ -24,6 +24,7 @@ interface Paper {
     sections: { heading: string; body: string }[];
   };
   markdown: string;
+  model: string | null;
   generatedAt: string;
 }
 
@@ -172,6 +173,7 @@ export default function PaperPage() {
             Generated on{" "}
             {new Date(paper.generatedAt).toLocaleDateString()} | Version{" "}
             {paper.version}
+            {paper.model && <> | Model: {paper.model}</>}
           </p>
         </div>
       )}

@@ -3,7 +3,7 @@ import { getAuthUser } from "@/lib/auth/api-auth";
 import { getDb } from "@/lib/db";
 import { submissions, papers } from "@/lib/db/schema";
 import { canTransition, SubmissionStatus } from "@/lib/workflow";
-import { generateFullPaper, paperToMarkdown } from "@/lib/ai/paper-generator";
+import { generateFullPaper, paperToMarkdown, PAPER_MODEL_ID } from "@/lib/ai/paper-generator";
 import { eq, and, desc } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
@@ -77,6 +77,7 @@ export async function POST(
         version,
         content: paperContent,
         markdown,
+        model: PAPER_MODEL_ID,
       })
       .returning();
 

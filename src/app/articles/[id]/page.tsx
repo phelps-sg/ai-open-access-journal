@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, ChevronDown, ChevronRight, ClipboardCheck, Bot, FileText, AlertTriangle } from "lucide-react";
+import { Loader2, ChevronDown, ChevronRight, ClipboardCheck, Bot, FileText, AlertTriangle, BarChart3 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -20,6 +20,7 @@ interface ArticleData {
     studyType: string;
     keywords: string[] | null;
     preRegistration: Record<string, unknown>;
+    results: Record<string, unknown> | null;
     createdAt: string;
   };
   author: { name: string; image: string | null };
@@ -30,6 +31,7 @@ interface ArticleData {
       abstract: string;
       sections: { heading: string; body: string }[];
     };
+    model: string | null;
     generatedAt: string;
   };
   reviews: {
@@ -55,6 +57,7 @@ export default function ArticlePage() {
   const [data, setData] = useState<ArticleData | null>(null);
   const [loading, setLoading] = useState(true);
   const [preRegOpen, setPreRegOpen] = useState(false);
+  const [resultsOpen, setResultsOpen] = useState(false);
   const [auditOpen, setAuditOpen] = useState(false);
 
   useEffect(() => {
@@ -67,6 +70,20 @@ export default function ArticlePage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, [params.id]);
+
+  // Auto-expand and scroll to section from URL hash
+  useEffect(() => {
+    if (!data || loading) return;
+    const hash = window.location.hash.replace("#", "");
+    if (hash === "pre-registration") setPreRegOpen(true);
+    if (hash === "results-data") setResultsOpen(true);
+    if (hash === "audit-trail") setAuditOpen(true);
+    if (hash) {
+      setTimeout(() => {
+        document.getElementById(hash)?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  }, [data, loading]);
 
   if (loading) {
     return (
@@ -183,7 +200,7 @@ export default function ArticlePage() {
 
       {/* Pre-Registration */}
       {submission.preRegistration && (
-        <section className="mb-8">
+        <section id="pre-registration" className="mb-8">
           <button
             onClick={() => setPreRegOpen(!preRegOpen)}
             className="flex items-center gap-2 text-2xl font-bold mb-4 hover:text-primary transition-colors"
@@ -230,9 +247,59 @@ export default function ArticlePage() {
         </section>
       )}
 
+      {/* Results Data */}
+      {submission.results && (
+        <section id="results-data" className="mb-8">
+          <button
+            onClick={() => setResultsOpen(!resultsOpen)}
+            className="flex items-center gap-2 text-2xl font-bold mb-4 hover:text-primary transition-colors"
+          >
+            <BarChart3 className="h-6 w-6" />
+            Results Data
+            {resultsOpen ? (
+              <ChevronDown className="h-5 w-5" />
+            ) : (
+              <ChevronRight className="h-5 w-5" />
+            )}
+          </button>
+          {resultsOpen && (
+            <Card>
+              <CardContent className="pt-6 space-y-4">
+                {Object.entries(submission.results).map(([key, value]) => {
+                  const label = key
+                    .replace(/([A-Z])/g, " $1")
+                    .replace(/^./, (s) => s.toUpperCase());
+                  const strVal = String(value);
+                  const isUrl = strVal.startsWith("http://") || strVal.startsWith("https://");
+                  return (
+                    <div key={key}>
+                      <h4 className="text-sm font-semibold text-foreground">{label}</h4>
+                      {isUrl ? (
+                        <a
+                          href={strVal}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary underline mt-1 inline-block"
+                        >
+                          {strVal}
+                        </a>
+                      ) : (
+                        <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
+                          {strVal}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          )}
+        </section>
+      )}
+
       {/* Audit Trail */}
       {auditTrail && auditTrail.length > 0 && (
-        <section className="mb-8">
+        <section id="audit-trail" className="mb-8">
           <button
             onClick={() => setAuditOpen(!auditOpen)}
             className="flex items-center gap-2 text-2xl font-bold mb-4 hover:text-primary transition-colors"
@@ -376,7 +443,9 @@ export default function ArticlePage() {
           are published openly.
         </p>
         <p className="mt-1">
-          Paper version {paper.version} &middot; Generated{" "}
+          Paper version {paper.version}
+          {paper.model && <> &middot; Model: {paper.model}</>}
+          {" "}&middot; Generated{" "}
           {new Date(paper.generatedAt).toLocaleDateString()}
         </p>
       </footer>

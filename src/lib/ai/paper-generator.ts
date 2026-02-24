@@ -1,6 +1,8 @@
 import { generateText } from "ai";
 import { anthropic } from "@ai-sdk/anthropic";
 
+export const PAPER_MODEL_ID = "claude-opus-4-6";
+
 export interface PaperSection {
   heading: string;
   body: string;
@@ -101,7 +103,7 @@ ${context}${prevContext}`,
   };
 
   const { text } = await generateText({
-    model: anthropic("claude-opus-4-6"),
+    model: anthropic(PAPER_MODEL_ID),
     system: SYSTEM_PROMPT,
     prompt: prompts[section],
     maxOutputTokens: 2000,
