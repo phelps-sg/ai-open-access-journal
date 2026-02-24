@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, ChevronDown, ChevronRight, ClipboardCheck, Bot, FileText } from "lucide-react";
+import { Loader2, ChevronDown, ChevronRight, ClipboardCheck, Bot, FileText, AlertTriangle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -85,9 +85,48 @@ export default function ArticlePage() {
   }
 
   const { submission, author, paper, reviews, auditTrail } = data;
+  const isDemo = submission.keywords?.includes("demo") ?? false;
 
   return (
-    <article className="container mx-auto max-w-4xl px-4 py-16">
+    <article className="container mx-auto max-w-4xl px-4 py-16 relative">
+      {/* Demo watermark overlay */}
+      {isDemo && (
+        <>
+          <div
+            className="pointer-events-none fixed inset-0 z-40 overflow-hidden"
+            aria-hidden="true"
+          >
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage:
+                  "repeating-linear-gradient(-45deg, transparent, transparent 80px, rgba(239,68,68,0.07) 80px, rgba(239,68,68,0.07) 82px)",
+              }}
+            />
+            <div className="absolute inset-0 flex flex-wrap items-center justify-center gap-32 -rotate-45 scale-150">
+              {Array.from({ length: 20 }).map((_, i) => (
+                <span
+                  key={i}
+                  className="text-red-500/10 text-4xl font-bold whitespace-nowrap select-none"
+                >
+                  DEMO &mdash; DO NOT CITE
+                </span>
+              ))}
+            </div>
+          </div>
+          <div className="mb-8 rounded-lg border-2 border-red-500 bg-red-50 dark:bg-red-950/30 p-4 text-center">
+            <div className="flex items-center justify-center gap-2 text-red-600 dark:text-red-400 font-bold text-lg">
+              <AlertTriangle className="h-5 w-5" />
+              DEMONSTRATION ONLY &mdash; DO NOT CITE
+            </div>
+            <p className="mt-1 text-sm text-red-600/80 dark:text-red-400/80">
+              This paper was generated with synthetic data for platform testing purposes.
+              It does not represent real research findings.
+            </p>
+          </div>
+        </>
+      )}
+
       {/* Header */}
       <header className="text-center">
         <Badge variant="outline" className="mb-4">
@@ -109,9 +148,9 @@ export default function ArticlePage() {
             {new Date(submission.createdAt).toLocaleDateString()}
           </span>
         </div>
-        {submission.keywords && submission.keywords.length > 0 && (
+        {submission.keywords && submission.keywords.filter((kw) => kw !== "demo").length > 0 && (
           <div className="mt-4 flex flex-wrap justify-center gap-1">
-            {submission.keywords.map((kw) => (
+            {submission.keywords.filter((kw) => kw !== "demo").map((kw) => (
               <Badge key={kw} variant="secondary" className="text-xs">
                 {kw}
               </Badge>
@@ -318,6 +357,16 @@ export default function ArticlePage() {
           </div>
         )}
       </section>
+
+      {/* Demo bottom banner */}
+      {isDemo && (
+        <div className="mt-8 rounded-lg border-2 border-red-500 bg-red-50 dark:bg-red-950/30 p-4 text-center">
+          <div className="flex items-center justify-center gap-2 text-red-600 dark:text-red-400 font-bold">
+            <AlertTriangle className="h-5 w-5" />
+            DEMONSTRATION ONLY &mdash; DO NOT CITE
+          </div>
+        </div>
+      )}
 
       {/* Metadata footer */}
       <Separator className="my-8" />
