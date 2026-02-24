@@ -34,7 +34,7 @@ export async function suggestReviewers(
   }
 
   const { text } = await generateText({
-    model: anthropic("claude-opus-4-20250514"),
+    model: anthropic("claude-opus-4-6"),
     system: EDITOR_SYSTEM_PROMPT,
     prompt: `Given a submission with these keywords: ${submissionKeywords.join(", ")}
 
@@ -83,7 +83,7 @@ export async function compileReviews(
   const db = getDb();
 
   const { text } = await generateText({
-    model: anthropic("claude-opus-4-20250514"),
+    model: anthropic("claude-opus-4-6"),
     system: EDITOR_SYSTEM_PROMPT,
     prompt: `Compile the following peer reviews into an editorial recommendation.
 
@@ -145,7 +145,7 @@ export async function checkConsistency(
   const db = getDb();
 
   const { text } = await generateText({
-    model: anthropic("claude-opus-4-20250514"),
+    model: anthropic("claude-opus-4-6"),
     system: EDITOR_SYSTEM_PROMPT,
     prompt: `Check the consistency between the pre-registration and the generated paper.
 
