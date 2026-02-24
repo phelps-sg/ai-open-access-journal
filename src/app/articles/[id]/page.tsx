@@ -8,6 +8,10 @@ import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, ChevronDown, ChevronRight, ClipboardCheck, Bot, FileText } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 interface ArticleData {
   submission: {
@@ -122,7 +126,7 @@ export default function ArticlePage() {
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-3">Abstract</h2>
         <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
-          <ReactMarkdown>{paper.content.abstract}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{paper.content.abstract}</ReactMarkdown>
         </div>
       </section>
 
@@ -131,7 +135,7 @@ export default function ArticlePage() {
         <section key={i} className="mb-8">
           <h2 className="text-xl font-semibold mb-3">{section.heading}</h2>
           <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
-            <ReactMarkdown>{section.body}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{section.body}</ReactMarkdown>
           </div>
         </section>
       ))}
@@ -223,7 +227,7 @@ export default function ArticlePage() {
                   {action.reasoning && (
                     <CardContent>
                       <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
-                        <ReactMarkdown>{action.reasoning}</ReactMarkdown>
+                        <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{action.reasoning}</ReactMarkdown>
                       </div>
                     </CardContent>
                   )}

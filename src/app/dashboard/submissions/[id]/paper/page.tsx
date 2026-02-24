@@ -9,6 +9,10 @@ import { toast } from "sonner";
 import { Loader2, RefreshCw, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 interface Paper {
   id: string;
@@ -144,7 +148,7 @@ export default function PaperPage() {
             </CardHeader>
             <CardContent>
               <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
-                <ReactMarkdown>{paper.content.abstract}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{paper.content.abstract}</ReactMarkdown>
               </div>
             </CardContent>
           </Card>
@@ -157,7 +161,7 @@ export default function PaperPage() {
               </CardHeader>
               <CardContent>
                 <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
-                  <ReactMarkdown>{section.body}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{section.body}</ReactMarkdown>
                 </div>
               </CardContent>
             </Card>
