@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import {
   FormField,
@@ -7,6 +8,7 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,6 +19,10 @@ interface CommonFieldsProps {
 }
 
 export function CommonFields({ form }: CommonFieldsProps) {
+  const [keywordsText, setKeywordsText] = useState<string>(
+    () => form.getValues("keywords")?.join(", ") ?? ""
+  );
+
   return (
     <div className="space-y-6">
       <FormField
@@ -77,21 +83,22 @@ export function CommonFields({ form }: CommonFieldsProps) {
         name="keywords"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Keywords</FormLabel>
+            <FormLabel>Keywords (optional)</FormLabel>
             <FormControl>
               <Input
-                placeholder="Comma-separated keywords (e.g. machine learning, clinical trials)"
-                value={field.value?.join(", ") ?? ""}
-                onChange={(e) =>
-                  field.onChange(
-                    e.target.value
-                      .split(",")
-                      .map((k: string) => k.trim())
-                      .filter(Boolean)
-                  )
-                }
+                placeholder="e.g. machine learning, clinical trials, bayesian inference"
+                value={keywordsText}
+                onChange={(e) => setKeywordsText(e.target.value)}
+                onBlur={() => {
+                  const parsed = keywordsText
+                    .split(",")
+                    .map((k: string) => k.trim())
+                    .filter(Boolean);
+                  field.onChange(parsed);
+                }}
               />
             </FormControl>
+            <FormDescription>Comma-separated</FormDescription>
             <FormMessage />
           </FormItem>
         )}

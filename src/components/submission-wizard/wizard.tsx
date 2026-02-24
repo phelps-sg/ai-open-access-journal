@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,9 +19,11 @@ import {
   simulationSchema,
   replicationSchema,
   negativeResultsSchema,
+  preRegistrationSchema,
   type PreRegistration,
 } from "@/lib/schemas/pre-registration";
-import { ArrowLeft, ArrowRight, Save, Send } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, Send, Upload } from "lucide-react";
+import { useRef } from "react";
 
 type StudyType = "empirical" | "simulation" | "replication" | "negative_results";
 
@@ -129,6 +131,48 @@ export function SubmissionWizard({ submissionId, initialData }: SubmissionWizard
   const handleStudyTypeSelect = (type: StudyType) => {
     setStudyType(type);
     form.reset(defaultValues[type]);
+  };
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleJsonUpload = useCallback(
+    async (file: File) => {
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        const result = preRegistrationSchema.safeParse(json);
+        if (!result.success) {
+          const errors = result.error.issues
+            .map((e) => `${e.path.join(".")}: ${e.message}`)
+            .slice(0, 10);
+          toast.error("Invalid JSON", {
+            description: errors.join("\n"),
+          });
+          return;
+        }
+        const data = result.data;
+        setStudyType(data.studyType as StudyType);
+        form.reset(data as Record<string, unknown>);
+        setStep(3);
+        toast.success("JSON loaded — review your pre-registration below");
+      } catch {
+        toast.error("Failed to parse JSON file");
+      }
+    },
+    [form]
+  );
+
+  const handleSubmitClick = async () => {
+    const valid = await form.trigger();
+    if (valid) {
+      onSubmit(form.getValues());
+    } else {
+      const errors = form.formState.errors;
+      const fieldNames = Object.keys(errors);
+      toast.error("Validation errors", {
+        description: `Fix the following fields: ${fieldNames.join(", ")}`,
+      });
+    }
   };
 
   const nextStep = async () => {
@@ -296,6 +340,44 @@ export function SubmissionWizard({ submissionId, initialData }: SubmissionWizard
                   value={studyType}
                   onChange={handleStudyTypeSelect}
                 />
+
+                <div className="relative my-6 flex items-center">
+                  <div className="flex-grow border-t border-border" />
+                  <span className="mx-4 text-sm text-muted-foreground">or</span>
+                  <div className="flex-grow border-t border-border" />
+                </div>
+
+                <div
+                  className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/25 p-8 transition-colors hover:border-primary/50 hover:bg-muted/50"
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const file = e.dataTransfer.files[0];
+                    if (file) handleJsonUpload(file);
+                  }}
+                >
+                  <Upload className="h-8 w-8 text-muted-foreground" />
+                  <p className="text-sm font-medium">Upload pre-registration JSON</p>
+                  <p className="text-xs text-muted-foreground">
+                    Drop a .json file here or click to browse
+                  </p>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".json"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleJsonUpload(file);
+                      e.target.value = "";
+                    }}
+                  />
+                </div>
               </CardContent>
             </Card>
           )}
@@ -383,7 +465,7 @@ export function SubmissionWizard({ submissionId, initialData }: SubmissionWizard
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               ) : (
-                <Button type="submit" disabled={saving}>
+                <Button type="button" onClick={handleSubmitClick} disabled={saving}>
                   <Send className="mr-2 h-4 w-4" />
                   Submit Pre-registration
                 </Button>

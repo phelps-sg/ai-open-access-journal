@@ -7,9 +7,6 @@ const createAuth = () =>
   NextAuth({
     adapter: DrizzleAdapter(getDb()),
     providers: [GitHub],
-    pages: {
-      signIn: "/auth/signin",
-    },
     callbacks: {
       session({ session, user }) {
         session.user.id = user.id;

@@ -6,7 +6,7 @@ const commonFields = {
   title: z.string().min(10, "Title must be at least 10 characters"),
   researchQuestion: z.string().min(20, "Please provide a detailed research question"),
   background: z.string().min(50, "Please provide sufficient background context"),
-  keywords: z.array(z.string()).min(1, "At least one keyword is required"),
+  keywords: z.array(z.string()).optional().default([]),
 };
 
 // ----- Empirical study (based on OSF pre-registration template) -----
