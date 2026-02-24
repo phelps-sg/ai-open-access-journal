@@ -8,6 +8,7 @@
     "build:clean": "rm -rf .next && next build 2>&1 | tail -30",
     "start": "next start",
     "lint": "eslint",
+    "setup": "bash scripts/setup.sh",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
