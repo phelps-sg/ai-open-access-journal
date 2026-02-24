@@ -33,8 +33,9 @@ Rules:
 5. If there are deviations from the pre-registered plan, flag them prominently.
 6. Write in clear, accessible scientific prose.
 7. Do not add interpretations beyond what the data supports.
-8. Include proper academic citations throughout the paper. Use the suggested references from the pre-registration as a starting point, but exercise your judgement — add additional citations where the content requires them (e.g. for methodological approaches, statistical techniques, prior findings, or theoretical frameworks). Use APA-style in-text citations (Author, Year) and provide a full reference list.
-9. Every citation in the text MUST appear in the References section and vice versa.`;
+8. Include proper academic citations throughout the paper. Use the suggested references from the pre-registration as a starting point, but exercise your judgement — add additional citations where the content requires them (e.g. for methodological approaches, statistical techniques, prior findings, or theoretical frameworks). Use APA-style in-text citations (Author, Year).
+9. Every citation in the text MUST appear in the final References section and vice versa.
+10. CRITICAL: Do NOT include a References list at the end of individual sections or the abstract. Only use in-text citations (Author, Year) within sections. The complete reference list will be generated as a separate, final References section.`;
 
 function buildContext(preRegistration: Record<string, unknown>, results: Record<string, unknown>) {
   return `## Pre-Registration

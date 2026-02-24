@@ -104,6 +104,13 @@ export default function ArticlePage() {
   const { submission, author, paper, reviews, auditTrail } = data;
   const isDemo = submission.keywords?.includes("demo") ?? false;
 
+  // Strip leading "# Heading" from section body since the page renders headings separately,
+  // and remove any embedded References sections (LLM sometimes appends these to each section)
+  const cleanSectionBody = (body: string) =>
+    body
+      .replace(/^#\s+.+\n+/, "")
+      .replace(/\n+\*{0,2}#{0,3}\s*References\*{0,2}\s*\n[\s\S]*$/i, "");
+
   return (
     <article className="container mx-auto max-w-4xl px-4 py-16 relative">
       {/* Demo watermark overlay */}
@@ -182,7 +189,7 @@ export default function ArticlePage() {
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-3">Abstract</h2>
         <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
-          <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{paper.content.abstract}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{cleanSectionBody(paper.content.abstract)}</ReactMarkdown>
         </div>
       </section>
 
@@ -191,7 +198,7 @@ export default function ArticlePage() {
         <section key={i} className="mb-8">
           <h2 className="text-xl font-semibold mb-3">{section.heading}</h2>
           <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
-            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{section.body}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{cleanSectionBody(section.body)}</ReactMarkdown>
           </div>
         </section>
       ))}

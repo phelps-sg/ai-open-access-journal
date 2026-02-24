@@ -34,6 +34,13 @@ export default function PaperPage() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
 
+  // Strip leading "# Heading" from section body since the page renders headings separately,
+  // and remove any embedded References sections (LLM sometimes appends these to each section)
+  const cleanSectionBody = (body: string) =>
+    body
+      .replace(/^#\s+.+\n+/, "")
+      .replace(/\n+\*{0,2}#{0,3}\s*References\*{0,2}\s*\n[\s\S]*$/i, "");
+
   const fetchPaper = () => {
     fetch(`/api/submissions/${params.id}/paper`)
       .then((res) => {
@@ -149,7 +156,7 @@ export default function PaperPage() {
             </CardHeader>
             <CardContent>
               <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
-                <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{paper.content.abstract}</ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{cleanSectionBody(paper.content.abstract)}</ReactMarkdown>
               </div>
             </CardContent>
           </Card>
@@ -162,7 +169,7 @@ export default function PaperPage() {
               </CardHeader>
               <CardContent>
                 <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
-                  <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{section.body}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{cleanSectionBody(section.body)}</ReactMarkdown>
                 </div>
               </CardContent>
             </Card>
