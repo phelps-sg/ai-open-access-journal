@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { submissions, papers, reviews, users } from "@/lib/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { submissions, papers, reviews, users, editorActions } from "@/lib/db/schema";
+import { eq, desc, asc } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -56,10 +56,18 @@ export async function GET(
     })
   );
 
+  // Get editor actions (audit trail)
+  const auditTrail = await db
+    .select()
+    .from(editorActions)
+    .where(eq(editorActions.submissionId, id))
+    .orderBy(asc(editorActions.createdAt));
+
   return NextResponse.json({
     submission,
     author: author ?? { name: "Unknown", image: null },
     paper,
     reviews: enrichedReviews,
+    auditTrail,
   });
 }

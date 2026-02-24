@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronDown, ChevronRight, ClipboardCheck, Bot, FileText } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface ArticleData {
@@ -37,12 +37,21 @@ interface ArticleData {
     sectionFeedback: { section: string; comment: string }[];
     createdAt: string;
   }[];
+  auditTrail: {
+    id: string;
+    actionType: string;
+    reasoning: string | null;
+    data: Record<string, unknown> | null;
+    createdAt: string;
+  }[];
 }
 
 export default function ArticlePage() {
   const params = useParams();
   const [data, setData] = useState<ArticleData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [preRegOpen, setPreRegOpen] = useState(false);
+  const [auditOpen, setAuditOpen] = useState(false);
 
   useEffect(() => {
     fetch(`/api/articles/${params.id}`)
@@ -71,7 +80,7 @@ export default function ArticlePage() {
     );
   }
 
-  const { submission, author, paper, reviews } = data;
+  const { submission, author, paper, reviews, auditTrail } = data;
 
   return (
     <article className="container mx-auto max-w-4xl px-4 py-16">
@@ -126,6 +135,104 @@ export default function ArticlePage() {
           </div>
         </section>
       ))}
+
+      <Separator className="my-8" />
+
+      {/* Pre-Registration */}
+      {submission.preRegistration && (
+        <section className="mb-8">
+          <button
+            onClick={() => setPreRegOpen(!preRegOpen)}
+            className="flex items-center gap-2 text-2xl font-bold mb-4 hover:text-primary transition-colors"
+          >
+            <ClipboardCheck className="h-6 w-6" />
+            Pre-Registration
+            {preRegOpen ? (
+              <ChevronDown className="h-5 w-5" />
+            ) : (
+              <ChevronRight className="h-5 w-5" />
+            )}
+          </button>
+          {preRegOpen && (
+            <Card>
+              <CardContent className="pt-6 space-y-4">
+                {Object.entries(submission.preRegistration).map(([key, value]) => {
+                  if (key === "studyType" || key === "keywords") return null;
+                  const label = key
+                    .replace(/([A-Z])/g, " $1")
+                    .replace(/^./, (s) => s.toUpperCase());
+                  return (
+                    <div key={key}>
+                      <h4 className="text-sm font-semibold text-foreground">{label}</h4>
+                      {typeof value === "object" && value !== null ? (
+                        <div className="mt-1 rounded-md bg-muted p-3 text-sm text-muted-foreground">
+                          {Object.entries(value as Record<string, unknown>).map(([k, v]) => (
+                            <div key={k}>
+                              <span className="font-medium capitalize">{k}:</span>{" "}
+                              {String(v)}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
+                          {String(value)}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          )}
+        </section>
+      )}
+
+      {/* Audit Trail */}
+      {auditTrail && auditTrail.length > 0 && (
+        <section className="mb-8">
+          <button
+            onClick={() => setAuditOpen(!auditOpen)}
+            className="flex items-center gap-2 text-2xl font-bold mb-4 hover:text-primary transition-colors"
+          >
+            <FileText className="h-6 w-6" />
+            Audit Trail
+            <Badge variant="secondary" className="ml-1">{auditTrail.length}</Badge>
+            {auditOpen ? (
+              <ChevronDown className="h-5 w-5" />
+            ) : (
+              <ChevronRight className="h-5 w-5" />
+            )}
+          </button>
+          {auditOpen && (
+            <div className="space-y-4">
+              {auditTrail.map((action) => (
+                <Card key={action.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Bot className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm">
+                          {action.actionType.replace(/_/g, " ").replace(/^./, (s) => s.toUpperCase())}
+                        </CardTitle>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(action.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+                  </CardHeader>
+                  {action.reasoning && (
+                    <CardContent>
+                      <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                        <ReactMarkdown>{action.reasoning}</ReactMarkdown>
+                      </div>
+                    </CardContent>
+                  )}
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       <Separator className="my-8" />
 
