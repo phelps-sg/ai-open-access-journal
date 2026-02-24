@@ -101,7 +101,7 @@ ${context}${prevContext}`,
   };
 
   const { text } = await generateText({
-    model: anthropic("claude-sonnet-4-20250514"),
+    model: anthropic("claude-opus-4-20250514"),
     system: SYSTEM_PROMPT,
     prompt: prompts[section],
     maxOutputTokens: 2000,
