@@ -2,11 +2,20 @@ import { z } from "zod/v4";
 
 // ----- Common fields shared across all study types -----
 
+const referenceSchema = z.object({
+  authors: z.string().min(1, "Provide author(s)"),
+  year: z.string().min(4, "Provide publication year"),
+  title: z.string().min(1, "Provide the paper title"),
+  journal: z.string().optional(),
+  doi: z.string().optional(),
+});
+
 const commonFields = {
   title: z.string().min(10, "Title must be at least 10 characters"),
   researchQuestion: z.string().min(20, "Please provide a detailed research question"),
   background: z.string().min(50, "Please provide sufficient background context"),
   keywords: z.array(z.string()).optional().default([]),
+  suggestedReferences: z.array(referenceSchema).optional().default([]),
 };
 
 // ----- Empirical study (based on OSF pre-registration template) -----
