@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BookOpen, LogOut, LayoutDashboard } from "lucide-react";
+import { LogOut, LayoutDashboard } from "lucide-react";
 
 export function Header() {
   const { data: session } = useSession();
@@ -20,8 +21,8 @@ export function Header() {
     <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
-          <BookOpen className="h-6 w-6" />
-          <span className="text-lg font-semibold">arxai - The AI Open Access Journal</span>
+          <Image src="/logo.png" alt="Arxai" width={40} height={40} />
+          <span className="text-lg font-semibold">arxai</span>
         </Link>
 
         <nav className="flex items-center gap-6">

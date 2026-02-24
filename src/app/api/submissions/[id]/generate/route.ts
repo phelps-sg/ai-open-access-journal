@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getAuthUser } from "@/lib/auth/api-auth";
 import { getDb } from "@/lib/db";
 import { submissions, papers } from "@/lib/db/schema";
 import { canTransition, SubmissionStatus } from "@/lib/workflow";
@@ -10,10 +10,10 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60; // Allow up to 60s for paper generation
 
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await auth();
+  const session = await getAuthUser(req);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

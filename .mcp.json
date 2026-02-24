@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "ai-journal": {
+      "command": "node",
+      "args": ["./mcp-server/dist/index.js"],
+      "env": {
+        "JOURNAL_API_KEY": "${API_KEY}",
+        "JOURNAL_API_URL": "http://localhost:3000"
+      }
+    }
+  }
+}
