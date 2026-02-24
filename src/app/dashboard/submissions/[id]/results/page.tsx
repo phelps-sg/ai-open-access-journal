@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,15 +16,17 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
+import { TextareaWithUpload } from "@/components/textarea-with-upload";
 import { toast } from "sonner";
 import { resultsSchema, type Results } from "@/lib/schemas/results";
-import { Loader2, Send } from "lucide-react";
+import { Loader2, Send, Upload } from "lucide-react";
 
 export default function ResultsPage() {
   const params = useParams();
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const jsonInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<Results>({
     resolver: zodResolver(resultsSchema),
@@ -49,6 +51,30 @@ export default function ResultsPage() {
       .catch(() => router.push("/dashboard/submissions"))
       .finally(() => setLoading(false));
   }, [params.id, router]);
+
+  const handleJsonUpload = useCallback(
+    async (file: File) => {
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        const result = resultsSchema.safeParse(json);
+        if (!result.success) {
+          const errors = result.error.issues
+            .map((e) => `${e.path.join(".")}: ${e.message}`)
+            .slice(0, 10);
+          toast.error("Invalid results JSON", {
+            description: errors.join("\n"),
+          });
+          return;
+        }
+        form.reset(result.data);
+        toast.success("Results JSON loaded — review and submit below");
+      } catch {
+        toast.error("Failed to parse JSON file");
+      }
+    },
+    [form]
+  );
 
   const onSubmit = async (values: Results) => {
     setSubmitting(true);
@@ -89,8 +115,49 @@ export default function ResultsPage() {
         results and your pre-registration.
       </p>
 
+      <Card className="mt-8">
+        <CardHeader>
+          <CardTitle>Upload Results JSON</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div
+            className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed border-muted-foreground/25 p-8 transition-colors hover:border-primary/50 hover:bg-muted/50"
+            onClick={() => jsonInputRef.current?.click()}
+            onDragOver={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            onDrop={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              const file = e.dataTransfer.files[0];
+              if (file) handleJsonUpload(file);
+            }}
+          >
+            <Upload className="h-8 w-8 text-muted-foreground" />
+            <p className="text-sm font-medium">
+              Drop a .json file here or click to browse
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Populate all fields at once from a results JSON file
+            </p>
+            <input
+              ref={jsonInputRef}
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleJsonUpload(file);
+                e.target.value = "";
+              }}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Results Data</CardTitle>
@@ -125,7 +192,16 @@ export default function ResultsPage() {
                       your dataset.
                     </FormDescription>
                     <FormControl>
-                      <Textarea rows={6} {...field} />
+                      <TextareaWithUpload
+                        rows={6}
+                        accept=".csv,.json,.txt,.tsv,.md"
+                        onFileContent={(content) =>
+                          form.setValue("rawData", content, {
+                            shouldValidate: true,
+                          })
+                        }
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -143,7 +219,16 @@ export default function ResultsPage() {
                       intervals, etc.
                     </FormDescription>
                     <FormControl>
-                      <Textarea rows={6} {...field} />
+                      <TextareaWithUpload
+                        rows={6}
+                        accept=".csv,.json,.txt,.tsv,.md"
+                        onFileContent={(content) =>
+                          form.setValue("statisticalResults", content, {
+                            shouldValidate: true,
+                          })
+                        }
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -160,7 +245,16 @@ export default function ResultsPage() {
                       Describe or link to any figures or tables.
                     </FormDescription>
                     <FormControl>
-                      <Textarea rows={3} {...field} />
+                      <TextareaWithUpload
+                        rows={3}
+                        accept=".txt,.md"
+                        onFileContent={(content) =>
+                          form.setValue("figures", content, {
+                            shouldValidate: true,
+                          })
+                        }
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
