@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Loader2, RefreshCw, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
 
 interface Paper {
   id: string;
@@ -142,9 +143,9 @@ export default function PaperPage() {
               <CardTitle>Abstract</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="whitespace-pre-wrap leading-relaxed text-muted-foreground">
-                {paper.content.abstract}
-              </p>
+              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                <ReactMarkdown>{paper.content.abstract}</ReactMarkdown>
+              </div>
             </CardContent>
           </Card>
 
@@ -155,8 +156,8 @@ export default function PaperPage() {
                 <CardTitle>{section.heading}</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="whitespace-pre-wrap leading-relaxed text-muted-foreground">
-                  {section.body}
+                <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                  <ReactMarkdown>{section.body}</ReactMarkdown>
                 </div>
               </CardContent>
             </Card>

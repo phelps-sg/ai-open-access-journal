@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2 } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 interface ArticleData {
   submission: {
@@ -111,17 +112,17 @@ export default function ArticlePage() {
       {/* Abstract */}
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-3">Abstract</h2>
-        <p className="leading-relaxed text-muted-foreground whitespace-pre-wrap">
-          {paper.content.abstract}
-        </p>
+        <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+          <ReactMarkdown>{paper.content.abstract}</ReactMarkdown>
+        </div>
       </section>
 
       {/* Sections */}
       {paper.content.sections.map((section, i) => (
         <section key={i} className="mb-8">
           <h2 className="text-xl font-semibold mb-3">{section.heading}</h2>
-          <div className="leading-relaxed text-muted-foreground whitespace-pre-wrap">
-            {section.body}
+          <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+            <ReactMarkdown>{section.body}</ReactMarkdown>
           </div>
         </section>
       ))}
