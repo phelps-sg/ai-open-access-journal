@@ -40,7 +40,8 @@ function buildContext(preRegistration: Record<string, unknown>, results: Record<
   return `## Pre-Registration
 ${JSON.stringify(preRegistration, null, 2)}
 
-## Results
+## Data Submission
+The researcher has provided the following data artifacts. You must analyse the data according to the pre-registered analysis plan and report the statistical results.
 ${JSON.stringify(results, null, 2)}`;
 }
 

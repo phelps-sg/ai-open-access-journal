@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormField,
@@ -16,10 +17,9 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { TextareaWithUpload } from "@/components/textarea-with-upload";
 import { toast } from "sonner";
 import { resultsSchema, type Results } from "@/lib/schemas/results";
-import { Loader2, Send, Upload } from "lucide-react";
+import { Loader2, Send, Upload, Plus, Trash2 } from "lucide-react";
 
 export default function ResultsPage() {
   const params = useParams();
@@ -31,13 +31,17 @@ export default function ResultsPage() {
   const form = useForm<Results>({
     resolver: zodResolver(resultsSchema),
     defaultValues: {
-      summary: "",
-      rawData: "",
-      statisticalResults: "",
-      figures: "",
+      dataFiles: [{ label: "", url: "", description: "" }],
+      codeRepository: "",
+      dataManifest: "",
       deviations: "",
       additionalNotes: "",
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "dataFiles",
   });
 
   useEffect(() => {
@@ -109,10 +113,10 @@ export default function ResultsPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold tracking-tight">Submit Results</h1>
+      <h1 className="text-3xl font-bold tracking-tight">Submit Data</h1>
       <p className="mt-2 text-muted-foreground">
-        Submit your raw findings. The AI will write up the paper based on these
-        results and your pre-registration.
+        Provide your raw data, code, and a manifest describing the files. The AI
+        writer will analyse the data and write up the paper.
       </p>
 
       <Card className="mt-8">
@@ -160,101 +164,114 @@ export default function ResultsPage() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Results Data</CardTitle>
+              <CardTitle>Data Files</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {fields.map((field, index) => (
+                <div key={field.id} className="space-y-3 rounded-lg border p-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">File {index + 1}</span>
+                    {fields.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => remove(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name={`dataFiles.${index}.label`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Label</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. Raw experiment data" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`dataFiles.${index}.url`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>URL</FormLabel>
+                        <FormControl>
+                          <Input placeholder="https://..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`dataFiles.${index}.description`}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description (optional)</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Brief description of this file"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => append({ label: "", url: "", description: "" })}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Add File
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Additional Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <FormField
                 control={form.control}
-                name="summary"
+                name="codeRepository"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Results Summary</FormLabel>
+                    <FormLabel>Code Repository (optional)</FormLabel>
                     <FormDescription>
-                      Summarize what you found. Be factual — the AI will handle
-                      the narrative.
+                      Link to your analysis code (e.g. GitHub repo).
+                    </FormDescription>
+                    <FormControl>
+                      <Input placeholder="https://github.com/..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="dataManifest"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Data Manifest</FormLabel>
+                    <FormDescription>
+                      Describe the data files: what they contain, format, key
+                      variables, and how they relate to the pre-registered design.
                     </FormDescription>
                     <FormControl>
                       <Textarea rows={6} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="rawData"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Raw Data</FormLabel>
-                    <FormDescription>
-                      Paste raw data, summary statistics, or provide a link to
-                      your dataset.
-                    </FormDescription>
-                    <FormControl>
-                      <TextareaWithUpload
-                        rows={6}
-                        accept=".csv,.json,.txt,.tsv,.md"
-                        onFileContent={(content) =>
-                          form.setValue("rawData", content, {
-                            shouldValidate: true,
-                          })
-                        }
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="statisticalResults"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Statistical Results</FormLabel>
-                    <FormDescription>
-                      Report test statistics, p-values, effect sizes, confidence
-                      intervals, etc.
-                    </FormDescription>
-                    <FormControl>
-                      <TextareaWithUpload
-                        rows={6}
-                        accept=".csv,.json,.txt,.tsv,.md"
-                        onFileContent={(content) =>
-                          form.setValue("statisticalResults", content, {
-                            shouldValidate: true,
-                          })
-                        }
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="figures"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Figures & Tables (optional)</FormLabel>
-                    <FormDescription>
-                      Describe or link to any figures or tables.
-                    </FormDescription>
-                    <FormControl>
-                      <TextareaWithUpload
-                        rows={3}
-                        accept=".txt,.md"
-                        onFileContent={(content) =>
-                          form.setValue("figures", content, {
-                            shouldValidate: true,
-                          })
-                        }
-                        {...field}
-                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -300,7 +317,7 @@ export default function ResultsPage() {
             <Button type="submit" disabled={submitting}>
               {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               <Send className="mr-2 h-4 w-4" />
-              Submit Results
+              Submit Data
             </Button>
           </div>
         </form>

@@ -262,38 +262,72 @@ export default function ArticlePage() {
               <ChevronRight className="h-5 w-5" />
             )}
           </button>
-          {resultsOpen && (
-            <Card>
-              <CardContent className="pt-6 space-y-4">
-                {Object.entries(submission.results).map(([key, value]) => {
-                  const label = key
-                    .replace(/([A-Z])/g, " $1")
-                    .replace(/^./, (s) => s.toUpperCase());
-                  const strVal = String(value);
-                  const isUrl = strVal.startsWith("http://") || strVal.startsWith("https://");
-                  return (
-                    <div key={key}>
-                      <h4 className="text-sm font-semibold text-foreground">{label}</h4>
-                      {isUrl ? (
-                        <a
-                          href={strVal}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-primary underline mt-1 inline-block"
-                        >
-                          {strVal}
-                        </a>
-                      ) : (
-                        <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">
-                          {strVal}
-                        </p>
-                      )}
+          {resultsOpen && (() => {
+            const r = submission.results as Record<string, unknown>;
+            const dataFiles = r.dataFiles as { label: string; url: string; description?: string }[] | undefined;
+            const codeRepository = r.codeRepository as string | undefined;
+            const dataManifest = r.dataManifest as string | undefined;
+            const deviations = r.deviations as string | undefined;
+            return (
+              <Card>
+                <CardContent className="pt-6 space-y-4">
+                  {dataFiles && dataFiles.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-foreground mb-2">Data Files</h4>
+                      <div className="space-y-2">
+                        {dataFiles.map((f, i) => (
+                          <div key={i} className="rounded-md bg-muted p-3 text-sm">
+                            <a href={f.url} target="_blank" rel="noopener noreferrer" className="text-primary underline font-medium">
+                              {f.label}
+                            </a>
+                            {f.description && (
+                              <p className="text-muted-foreground mt-1">{f.description}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          )}
+                  )}
+                  {codeRepository && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-foreground">Code Repository</h4>
+                      <a href={codeRepository} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline mt-1 inline-block">
+                        {codeRepository}
+                      </a>
+                    </div>
+                  )}
+                  {dataManifest && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-foreground">Data Manifest</h4>
+                      <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">{dataManifest}</p>
+                    </div>
+                  )}
+                  {deviations && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-foreground">Deviations from Pre-registration</h4>
+                      <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">{deviations}</p>
+                    </div>
+                  )}
+                  {/* Fallback for old-format results without dataFiles */}
+                  {!dataFiles && Object.entries(r).map(([key, value]) => {
+                    const label = key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
+                    const strVal = String(value);
+                    const isUrl = strVal.startsWith("http://") || strVal.startsWith("https://");
+                    return (
+                      <div key={key}>
+                        <h4 className="text-sm font-semibold text-foreground">{label}</h4>
+                        {isUrl ? (
+                          <a href={strVal} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline mt-1 inline-block">{strVal}</a>
+                        ) : (
+                          <p className="text-sm text-muted-foreground mt-1 whitespace-pre-wrap">{strVal}</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </CardContent>
+              </Card>
+            );
+          })()}
         </section>
       )}
 

@@ -1,10 +1,15 @@
 import { z } from "zod/v4";
 
+const dataFileSchema = z.object({
+  label: z.string().min(1, "Provide a label for this file"),
+  url: z.string().url("Provide a valid URL"),
+  description: z.string().optional(),
+});
+
 export const resultsSchema = z.object({
-  summary: z.string().min(50, "Please provide a detailed summary of your results"),
-  rawData: z.string().min(10, "Provide your raw data or a link to it"),
-  statisticalResults: z.string().min(20, "Describe the statistical results"),
-  figures: z.string().optional(),
+  dataFiles: z.array(dataFileSchema).min(1, "Provide at least one data file or link"),
+  codeRepository: z.string().url("Provide a valid URL").optional(),
+  dataManifest: z.string().min(20, "Describe the data files and what they contain"),
   deviations: z.string().optional(),
   additionalNotes: z.string().optional(),
 });
