@@ -6,12 +6,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, ChevronDown, ChevronRight, ClipboardCheck, Bot, FileText, AlertTriangle, BarChart3 } from "lucide-react";
+import { Loader2, ChevronDown, ChevronRight, ClipboardCheck, Bot, FileText, AlertTriangle, BarChart3, CheckCircle2, XCircle, AlertCircle, ExternalLink, ShieldCheck } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
+
+interface VerificationResult {
+  citation: { raw: string; title: string; authors: string; year: string };
+  status: "verified" | "unverified" | "partial_match";
+  source: "semantic_scholar" | "crossref" | null;
+  doi?: string;
+  url?: string;
+  citationCount?: number;
+  confidence: number;
+}
+
+interface CitationValidation {
+  verifiedAt: string;
+  total: number;
+  verified: number;
+  unverified: number;
+  partialMatch: number;
+  results: VerificationResult[];
+}
 
 interface ArticleData {
   submission: {
@@ -34,6 +53,7 @@ interface ArticleData {
     model: string | null;
     generatedAt: string;
   };
+  citationValidations: CitationValidation | null;
   reviews: {
     id: string;
     reviewerName: string;
@@ -101,7 +121,7 @@ export default function ArticlePage() {
     );
   }
 
-  const { submission, author, paper, reviews, auditTrail } = data;
+  const { submission, author, paper, citationValidations, reviews, auditTrail } = data;
   const isDemo = submission.keywords?.includes("demo") ?? false;
 
   // Strip leading "# Heading" from section body since the page renders headings separately,
@@ -194,14 +214,87 @@ export default function ArticlePage() {
       </section>
 
       {/* Sections */}
-      {paper.content.sections.map((section, i) => (
-        <section key={i} className="mb-8">
-          <h2 className="text-xl font-semibold mb-3">{section.heading}</h2>
-          <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
-            <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{cleanSectionBody(section.body)}</ReactMarkdown>
-          </div>
-        </section>
-      ))}
+      {paper.content.sections.map((section, i) => {
+        const isReferences = section.heading.toLowerCase().replace(/[^a-z]/g, "") === "references";
+        return (
+          <section key={i} className="mb-8">
+            <div className="flex items-center gap-3 mb-3">
+              <h2 className="text-xl font-semibold">{section.heading}</h2>
+              {isReferences && citationValidations && (
+                <Badge
+                  variant={
+                    citationValidations.unverified === 0
+                      ? "default"
+                      : citationValidations.verified > citationValidations.unverified
+                        ? "secondary"
+                        : "destructive"
+                  }
+                  className="flex items-center gap-1"
+                >
+                  <ShieldCheck className="h-3 w-3" />
+                  {citationValidations.verified}/{citationValidations.total} verified
+                </Badge>
+              )}
+            </div>
+            {isReferences && citationValidations ? (
+              <div className="space-y-1">
+                {(() => {
+                  // Split references body into individual entries to annotate each
+                  const refs = cleanSectionBody(section.body)
+                    .split(/\n(?=\s*[A-Z][a-zA-Z'-]+,\s*[A-Z])/)
+                    .map((e) => e.trim())
+                    .filter((e) => e.length > 10);
+
+                  return refs.map((ref, ri) => {
+                    // Try to match this reference to a verification result
+                    const match = citationValidations.results.find(
+                      (r) =>
+                        ref.includes(r.citation.year) &&
+                        (ref.toLowerCase().includes(r.citation.title.toLowerCase().slice(0, 30)) ||
+                          r.citation.authors.split(",")[0] &&
+                          ref.includes(r.citation.authors.split(",")[0].trim()))
+                    );
+
+                    return (
+                      <div key={ri} className="flex items-start gap-2 group">
+                        <span className="mt-1 shrink-0">
+                          {match?.status === "verified" ? (
+                            <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                          ) : match?.status === "partial_match" ? (
+                            <AlertCircle className="h-3.5 w-3.5 text-yellow-600 dark:text-yellow-400" />
+                          ) : match ? (
+                            <XCircle className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+                          ) : (
+                            <span className="inline-block h-3.5 w-3.5" />
+                          )}
+                        </span>
+                        <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground flex-1">
+                          <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{ref}</ReactMarkdown>
+                        </div>
+                        {match?.doi && (
+                          <a
+                            href={`https://doi.org/${match.doi}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-primary"
+                            title="View on DOI"
+                          >
+                            <ExternalLink className="h-3.5 w-3.5" />
+                          </a>
+                        )}
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            ) : (
+              <div className="prose prose-sm dark:prose-invert max-w-none text-muted-foreground">
+                <ReactMarkdown remarkPlugins={[remarkGfm, remarkMath]} rehypePlugins={[rehypeKatex]}>{cleanSectionBody(section.body)}</ReactMarkdown>
+              </div>
+            )}
+          </section>
+        );
+      })}
 
       <Separator className="my-8" />
 

@@ -136,6 +136,7 @@ export const papers = pgTable("paper", {
   }>(),
   markdown: text("markdown"),
   model: text("model"),
+  citationValidations: jsonb("citation_validations"),
   generatedAt: timestamp("generated_at", { mode: "date" })
     .defaultNow()
     .notNull(),

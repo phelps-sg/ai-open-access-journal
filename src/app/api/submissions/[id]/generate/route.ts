@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { submissions, papers } from "@/lib/db/schema";
 import { canTransition, SubmissionStatus } from "@/lib/workflow";
 import { generateFullPaper, paperToMarkdown, PAPER_MODEL_ID } from "@/lib/ai/paper-generator";
+import { verifyCitations } from "@/lib/ai/citation-verifier";
 import { eq, and, desc } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
@@ -86,6 +87,16 @@ export async function POST(
       .update(submissions)
       .set({ status: "paper_generated", updatedAt: new Date() })
       .where(eq(submissions.id, id));
+
+    // Fire-and-forget citation verification
+    verifyCitations(paperContent)
+      .then(async (validation) => {
+        await db
+          .update(papers)
+          .set({ citationValidations: validation })
+          .where(eq(papers.id, paper.id));
+      })
+      .catch(console.error);
 
     return NextResponse.json(paper);
   } catch (error) {

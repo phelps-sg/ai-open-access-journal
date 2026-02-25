@@ -67,6 +67,7 @@ export async function GET(
     submission,
     author: author ?? { name: "Unknown", image: null },
     paper,
+    citationValidations: paper?.citationValidations ?? null,
     reviews: enrichedReviews,
     auditTrail,
   });

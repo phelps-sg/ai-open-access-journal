@@ -6,13 +6,33 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, RefreshCw, ArrowLeft } from "lucide-react";
+import { Loader2, RefreshCw, ArrowLeft, CheckCircle2, XCircle, AlertCircle, ExternalLink, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
+
+interface VerificationResult {
+  citation: { raw: string; title: string; authors: string; year: string };
+  status: "verified" | "unverified" | "partial_match";
+  source: "semantic_scholar" | "crossref" | null;
+  matchedTitle?: string;
+  doi?: string;
+  url?: string;
+  citationCount?: number;
+  confidence: number;
+}
+
+interface CitationValidation {
+  verifiedAt: string;
+  total: number;
+  verified: number;
+  unverified: number;
+  partialMatch: number;
+  results: VerificationResult[];
+}
 
 interface Paper {
   id: string;
@@ -33,6 +53,8 @@ export default function PaperPage() {
   const [paper, setPaper] = useState<Paper | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [citationValidation, setCitationValidation] = useState<CitationValidation | null>(null);
+  const [verifying, setVerifying] = useState(false);
 
   // Strip leading "# Heading" from section body since the page renders headings separately,
   // and remove any embedded References sections (LLM sometimes appends these to each section)
@@ -41,6 +63,37 @@ export default function PaperPage() {
       .replace(/^#\s+.+\n+/, "")
       .replace(/\n+\*{0,2}#{0,3}\s*References\*{0,2}\s*\n[\s\S]*$/i, "");
 
+  const fetchCitations = () => {
+    fetch(`/api/submissions/${params.id}/citations`)
+      .then((res) => {
+        if (!res.ok) return null;
+        return res.json();
+      })
+      .then((data) => {
+        if (data?.citationValidations) {
+          setCitationValidation(data.citationValidations);
+        }
+      })
+      .catch(() => {});
+  };
+
+  const reverify = async () => {
+    setVerifying(true);
+    try {
+      const res = await fetch(`/api/submissions/${params.id}/citations`, {
+        method: "POST",
+      });
+      if (!res.ok) throw new Error("Verification failed");
+      const data = await res.json();
+      setCitationValidation(data.citationValidations);
+      toast.success("Citation verification complete!");
+    } catch {
+      toast.error("Failed to verify citations");
+    } finally {
+      setVerifying(false);
+    }
+  };
+
   const fetchPaper = () => {
     fetch(`/api/submissions/${params.id}/paper`)
       .then((res) => {
@@ -48,7 +101,10 @@ export default function PaperPage() {
         if (!res.ok) throw new Error("Failed to load paper");
         return res.json();
       })
-      .then(setPaper)
+      .then((data) => {
+        setPaper(data);
+        if (data) fetchCitations();
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   };
@@ -174,6 +230,103 @@ export default function PaperPage() {
               </CardContent>
             </Card>
           ))}
+
+          {/* Citation Verification */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5" />
+                  <CardTitle>Citation Verification</CardTitle>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={reverify}
+                  disabled={verifying}
+                >
+                  {verifying ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                  )}
+                  {citationValidation ? "Re-verify" : "Verify"} Citations
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {!citationValidation ? (
+                <p className="text-sm text-muted-foreground">
+                  Citation verification has not been run yet. Click
+                  &quot;Verify Citations&quot; to check references against
+                  Semantic Scholar and CrossRef.
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {/* Summary */}
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                      <CheckCircle2 className="h-4 w-4" />
+                      {citationValidation.verified} verified
+                    </span>
+                    <span className="flex items-center gap-1 text-yellow-600 dark:text-yellow-400">
+                      <AlertCircle className="h-4 w-4" />
+                      {citationValidation.partialMatch} partial
+                    </span>
+                    <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
+                      <XCircle className="h-4 w-4" />
+                      {citationValidation.unverified} unverified
+                    </span>
+                    <span className="text-muted-foreground ml-auto text-xs">
+                      Checked {new Date(citationValidation.verifiedAt).toLocaleString()}
+                    </span>
+                  </div>
+
+                  {/* Per-citation rows */}
+                  <div className="space-y-2">
+                    {citationValidation.results.map((r, i) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-3 rounded-md border p-3 text-sm"
+                      >
+                        {r.status === "verified" ? (
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600 dark:text-green-400" />
+                        ) : r.status === "partial_match" ? (
+                          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-yellow-600 dark:text-yellow-400" />
+                        ) : (
+                          <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium truncate">
+                            {r.citation.title}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {r.citation.authors} ({r.citation.year})
+                            {r.source && (
+                              <> &middot; via {r.source.replace("_", " ")}</>
+                            )}
+                            {r.citationCount != null && (
+                              <> &middot; {r.citationCount} citations</>
+                            )}
+                          </p>
+                        </div>
+                        {r.doi && (
+                          <a
+                            href={`https://doi.org/${r.doi}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="shrink-0 text-primary hover:underline"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Metadata */}
           <p className="text-center text-xs text-muted-foreground">
