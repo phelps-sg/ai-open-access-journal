@@ -24,19 +24,28 @@ export default function AboutPage() {
             drive researchers to p-hack, spin results, and bury negative
             findings. Journals prefer novel, positive results, creating a
             distorted picture of scientific knowledge. The replication crisis is
-            a symptom; the incentive structure is the disease.
+            a symptom; the incentive structure is the disease. Now AI
+            ghostwriting is compounding the problem — researchers increasingly
+            use large language models to draft papers without disclosure, adding
+            another layer of opacity to a system already short on transparency.
           </p>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold">The Insight</h2>
           <p className="mt-3 text-muted-foreground leading-relaxed">
-            AI has no career to advance, no tenure case to build, no grant to
-            win. Given a pre-registered design and raw results, AI can write up
-            findings faithfully — reporting what was found, whether positive,
-            negative, or null, without narrative spin. This frees human
-            researchers to focus on what they do best: designing studies,
-            interpreting significance, and critically reviewing methodology.
+            AI is already writing scientific papers — the question is no longer
+            whether to use it, but whether to use it transparently. Behind
+            closed doors, researchers prompt language models to draft manuscripts
+            with no audit trail and no accountability. This platform takes the
+            opposite approach: a fully audited pipeline where every step from
+            pre-registration to final publication is logged and visible. AI has
+            no career to advance, no tenure case to build, no grant to win.
+            Given a pre-registered design and raw results, it reports what was
+            found — positive, negative, or null — without narrative spin. This
+            frees human researchers to focus on what they do best: designing
+            studies, interpreting significance, and critically reviewing
+            methodology.
           </p>
         </section>
 
@@ -84,7 +93,10 @@ export default function AboutPage() {
               <CardContent className="text-sm text-muted-foreground">
                 Published articles include the full chain: pre-registration,
                 results, AI-generated paper, peer reviews, and editorial
-                reasoning. Nothing is hidden.
+                reasoning. The entire generation process is logged — every
+                prompt, model version, and editorial decision forms part of
+                a permanent audit trail published alongside the paper. Nothing
+                is hidden.
               </CardContent>
             </Card>
           </div>
@@ -113,6 +125,11 @@ export default function AboutPage() {
               <strong>Human oversight:</strong> AI writes; humans design, review,
               and decide. Reviewers are recognised as equal contributors to the
               scientific record.
+            </li>
+            <li>
+              <strong>Audited pipeline:</strong> Every step — from
+              pre-registration through generation to editorial decision — is
+              logged and published. The process is the proof.
             </li>
           </ul>
         </section>

@@ -31,7 +31,7 @@ const workflowSteps = [
     icon: FileText,
     title: "3. AI Writes the Paper",
     description:
-      "AI faithfully reports your findings from the pre-registered design. No spin, no p-hacking.",
+      "AI faithfully reports your findings from the pre-registered design. No spin, no p-hacking. The entire generation process is audited and visible in the published article.",
   },
   {
     icon: Users,
@@ -43,7 +43,7 @@ const workflowSteps = [
     icon: CheckCircle,
     title: "5. Publication",
     description:
-      "Accepted papers are published with full transparency: pre-registration, data, and reviews.",
+      "Accepted papers are published with full transparency: pre-registration, data, reviews, and a complete audit trail of every editorial decision.",
   },
 ];
 
@@ -86,7 +86,8 @@ export default function Home() {
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
             AI writes the papers. Humans do the science and the reviewing.
             Pre-registered designs ensure findings are reported faithfully —
-            positive, negative, or null.
+            positive, negative, or null. Not AI ghostwriting — a controlled,
+            auditable pipeline where every step is transparent.
           </p>
           <div className="mt-10 flex items-center justify-center gap-4">
             <Button asChild size="lg">
@@ -109,8 +110,9 @@ export default function Home() {
             How It Works
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-center text-muted-foreground">
-            A transparent pipeline from hypothesis to publication, with AI
-            handling the write-up so researchers can focus on what matters.
+            A fully audited pipeline from hypothesis to publication — every
+            step logged and visible — with AI handling the write-up so
+            researchers can focus on what matters.
           </p>
           <div className="mt-12 grid gap-8 md:grid-cols-5">
             {workflowSteps.map((step) => (
@@ -164,8 +166,9 @@ export default function Home() {
             Ready to publish — or review — without bias?
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
-            Join researchers who believe that how we report science matters as
-            much as how we do it.
+            AI is already writing papers behind closed doors. The choice is
+            between opaque AI ghostwriting and transparent, auditable AI
+            authorship. Join researchers building the alternative.
           </p>
           <Button asChild size="lg" className="mt-8">
             <Link href="/dashboard/submissions/new">

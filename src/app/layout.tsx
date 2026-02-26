@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AI Open Access Journal",
   description:
-    "AI-authored scientific papers from pre-registered designs, with human peer review. Eliminating publication bias through transparent, incentive-free research reporting.",
+    "A fully audited AI pipeline for scientific publishing. Pre-registered designs, transparent generation, human peer review — every step logged and visible. Eliminating publication bias through accountable, incentive-free research reporting.",
 };
 
 export default function RootLayout({

@@ -618,8 +618,10 @@ export default function ArticlePage() {
       <Separator className="my-8" />
       <footer className="text-center text-xs text-muted-foreground">
         <p>
-          This paper was AI-authored from a pre-registered design. All reviews
-          are published openly as attributed contributions to the scientific record.
+          This paper was AI-authored through a fully audited pipeline. The
+          pre-registration, generation process, peer review, and editorial
+          decisions are all published and verifiable. All reviews are openly
+          attributed contributions to the scientific record.
         </p>
         <p className="mt-1">
           Paper version {paper.version}
