@@ -19,5 +19,10 @@ export const reviewSchema = z.object({
   summary: z.string().min(50, "Please provide a detailed review summary"),
 });
 
+export const reviewerPerspectiveSchema = z.object({
+  content: z.string().min(100, "Please provide a substantive perspective (at least 100 characters)"),
+});
+
 export type ReviewInput = z.infer<typeof reviewSchema>;
 export type ReviewScores = z.infer<typeof reviewScoresSchema>;
+export type ReviewerPerspectiveInput = z.infer<typeof reviewerPerspectiveSchema>;

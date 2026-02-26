@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { submissions, papers, reviews, users, editorActions } from "@/lib/db/schema";
+import { submissions, papers, reviews, users, editorActions, reviewerPerspectives } from "@/lib/db/schema";
 import { eq, desc, asc } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
@@ -63,12 +63,25 @@ export async function GET(
     .where(eq(editorActions.submissionId, id))
     .orderBy(asc(editorActions.createdAt));
 
+  // Get reviewer perspectives
+  const perspectives = await db
+    .select({
+      id: reviewerPerspectives.id,
+      content: reviewerPerspectives.content,
+      createdAt: reviewerPerspectives.createdAt,
+      reviewerName: users.name,
+    })
+    .from(reviewerPerspectives)
+    .innerJoin(users, eq(reviewerPerspectives.reviewerId, users.id))
+    .where(eq(reviewerPerspectives.submissionId, id));
+
   return NextResponse.json({
     submission,
     author: author ?? { name: "Unknown", image: null },
     paper,
     citationValidations: paper?.citationValidations ?? null,
     reviews: enrichedReviews,
+    perspectives,
     auditTrail,
   });
 }

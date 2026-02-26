@@ -70,9 +70,11 @@ export default function AboutPage() {
               </CardHeader>
               <CardContent className="text-sm text-muted-foreground">
                 Human experts review the methodology, analysis, and
-                interpretation. Reviews are published alongside the paper for
-                full transparency. The AI editor manages the workflow, matches
-                reviewers, and compiles editorial recommendations.
+                interpretation. Reviews are published alongside the paper as
+                attributed, citable contributions — reviewers build a public
+                track record of impact, not just authors. The AI editor manages
+                the workflow, matches reviewers, and compiles editorial
+                recommendations.
               </CardContent>
             </Card>
             <Card>
@@ -109,7 +111,8 @@ export default function AboutPage() {
             </li>
             <li>
               <strong>Human oversight:</strong> AI writes; humans design, review,
-              and decide.
+              and decide. Reviewers are recognised as equal contributors to the
+              scientific record.
             </li>
           </ul>
         </section>

@@ -33,7 +33,7 @@ export default function ArticlesPage() {
       <h1 className="text-3xl font-bold tracking-tight">Published Articles</h1>
       <p className="mt-2 text-muted-foreground">
         Peer-reviewed research with full transparency — pre-registrations,
-        AI-authored papers, and open reviews.
+        AI-authored papers, and openly attributed reviews.
       </p>
 
       {loading ? (

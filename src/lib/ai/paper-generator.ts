@@ -70,7 +70,7 @@ ABSTRACT:
 
 ${context}`,
     introduction: `Write the Introduction section for this paper. Include:
-- Background and motivation from the pre-registration
+- The author's motivation IN THEIR OWN WORDS from the pre-registration motivation field — preserve their voice and framing
 - Research question and hypotheses
 - Brief overview of the approach
 - Cite relevant prior work using APA-style (Author, Year) citations. Use the suggested references from the pre-registration and add others where appropriate.

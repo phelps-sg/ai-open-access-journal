@@ -13,7 +13,7 @@ const referenceSchema = z.object({
 const commonFields = {
   title: z.string().min(10, "Title must be at least 10 characters"),
   researchQuestion: z.string().min(20, "Please provide a detailed research question"),
-  background: z.string().min(50, "Please provide sufficient background context"),
+  motivation: z.string().min(100, "Please provide a detailed motivation — why does this research matter, what gap does it address, and what is the intellectual context?"),
   keywords: z.array(z.string()).optional().default([]),
   suggestedReferences: z.array(referenceSchema).optional().default([]),
 };

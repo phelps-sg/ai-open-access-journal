@@ -62,14 +62,14 @@ export function CommonFields({ form }: CommonFieldsProps) {
 
       <FormField
         control={form.control}
-        name="background"
+        name="motivation"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Background & Motivation</FormLabel>
+            <FormLabel>Motivation</FormLabel>
             <FormControl>
               <Textarea
-                placeholder="Provide context for why this research is important and what gap it addresses."
-                rows={5}
+                placeholder="Why does this research matter? What gap does it address? What is the intellectual context? Write in your own voice — this text will be preserved in the published paper's Introduction."
+                rows={8}
                 {...field}
               />
             </FormControl>

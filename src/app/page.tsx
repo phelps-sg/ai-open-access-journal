@@ -37,7 +37,7 @@ const workflowSteps = [
     icon: Users,
     title: "4. Human Peer Review",
     description:
-      "Expert reviewers evaluate methodology and significance. All reviews are published openly.",
+      "Expert reviewers evaluate methodology and significance. Every review is published, attributed, and citable — building the reviewer's public track record alongside the author's.",
   },
   {
     icon: CheckCircle,
@@ -161,7 +161,7 @@ export default function Home() {
         <div className="container mx-auto px-4 py-20 text-center">
           <BookOpen className="mx-auto h-12 w-12 text-primary" />
           <h2 className="mt-6 text-3xl font-bold tracking-tight">
-            Ready to publish without bias?
+            Ready to publish — or review — without bias?
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
             Join researchers who believe that how we report science matters as

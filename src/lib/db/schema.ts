@@ -176,6 +176,19 @@ export const editorActions = pgTable("editor_action", {
   createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
 });
 
+export const reviewerPerspectives = pgTable("reviewer_perspective", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  submissionId: uuid("submission_id")
+    .notNull()
+    .references(() => submissions.id, { onDelete: "cascade" }),
+  reviewerId: text("reviewer_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at", { mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).defaultNow().notNull(),
+});
+
 export const reviewerInvitations = pgTable("reviewer_invitation", {
   id: uuid("id").defaultRandom().primaryKey(),
   submissionId: uuid("submission_id")
@@ -201,6 +214,7 @@ export const submissionsRelations = relations(submissions, ({ one, many }) => ({
   papers: many(papers),
   editorActions: many(editorActions),
   reviewerInvitations: many(reviewerInvitations),
+  reviewerPerspectives: many(reviewerPerspectives),
 }));
 
 export const papersRelations = relations(papers, ({ one, many }) => ({
@@ -232,6 +246,20 @@ export const reviewerInvitationsRelations = relations(
     }),
     reviewer: one(users, {
       fields: [reviewerInvitations.reviewerId],
+      references: [users.id],
+    }),
+  })
+);
+
+export const reviewerPerspectivesRelations = relations(
+  reviewerPerspectives,
+  ({ one }) => ({
+    submission: one(submissions, {
+      fields: [reviewerPerspectives.submissionId],
+      references: [submissions.id],
+    }),
+    reviewer: one(users, {
+      fields: [reviewerPerspectives.reviewerId],
       references: [users.id],
     }),
   })

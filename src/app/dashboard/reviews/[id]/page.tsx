@@ -176,6 +176,9 @@ export default function ReviewPage() {
         <h2 className="text-xl font-bold sticky top-0 bg-background py-2">
           Your Review
         </h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          This review will be published alongside the paper as an attributed, citable contribution.
+        </p>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -322,7 +325,7 @@ export default function ReviewPage() {
                     <FormItem>
                       <FormLabel>Review Summary</FormLabel>
                       <FormDescription>
-                        Provide an overall assessment of the paper.
+                        Provide an overall assessment of the paper. This summary will be published under your name.
                       </FormDescription>
                       <FormControl>
                         <Textarea rows={6} {...field} />

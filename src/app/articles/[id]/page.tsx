@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Loader2, ChevronDown, ChevronRight, ClipboardCheck, Bot, FileText, AlertTriangle, BarChart3, CheckCircle2, XCircle, AlertCircle, ExternalLink, ShieldCheck } from "lucide-react";
+import { Loader2, ChevronDown, ChevronRight, ClipboardCheck, Bot, FileText, AlertTriangle, BarChart3, CheckCircle2, XCircle, AlertCircle, ExternalLink, ShieldCheck, MessageSquarePlus } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
@@ -62,6 +62,12 @@ interface ArticleData {
     summary: string;
     sectionFeedback: { section: string; comment: string }[];
     createdAt: string;
+  }[];
+  perspectives: {
+    id: string;
+    content: string;
+    createdAt: string;
+    reviewerName: string | null;
   }[];
   auditTrail: {
     id: string;
@@ -121,7 +127,7 @@ export default function ArticlePage() {
     );
   }
 
-  const { submission, author, paper, citationValidations, reviews, auditTrail } = data;
+  const { submission, author, paper, citationValidations, reviews, perspectives, auditTrail } = data;
   const isDemo = submission.keywords?.includes("demo") ?? false;
 
   // Strip leading "# Heading" from section body since the page renders headings separately,
@@ -491,9 +497,14 @@ export default function ArticlePage() {
               <Card key={review.id}>
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-base">
-                      Review by {review.reviewerName}
-                    </CardTitle>
+                    <div className="flex items-center gap-2">
+                      <CardTitle className="text-base">
+                        Review by {review.reviewerName}
+                      </CardTitle>
+                      <span className="text-xs text-muted-foreground hover:text-primary cursor-pointer">
+                        Cite this review
+                      </span>
+                    </div>
                     <Badge
                       variant={
                         review.recommendation === "accept"
@@ -559,6 +570,40 @@ export default function ArticlePage() {
         )}
       </section>
 
+      {/* Reviewer Perspectives */}
+      {perspectives && perspectives.length > 0 && (
+        <>
+          <Separator className="my-8" />
+          <section>
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+              <MessageSquarePlus className="h-6 w-6" />
+              Reviewer Perspectives
+            </h2>
+            <div className="space-y-6">
+              {perspectives.map((perspective) => (
+                <Card key={perspective.id}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base">
+                        {perspective.reviewerName ?? "Anonymous"}
+                      </CardTitle>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(perspective.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {perspective.content}
+                    </p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
+        </>
+      )}
+
       {/* Demo bottom banner */}
       {isDemo && (
         <div className="mt-8 rounded-lg border-2 border-red-500 bg-red-50 dark:bg-red-950/30 p-4 text-center">
@@ -574,7 +619,7 @@ export default function ArticlePage() {
       <footer className="text-center text-xs text-muted-foreground">
         <p>
           This paper was AI-authored from a pre-registered design. All reviews
-          are published openly.
+          are published openly as attributed contributions to the scientific record.
         </p>
         <p className="mt-1">
           Paper version {paper.version}
