@@ -99,6 +99,11 @@ export default function Home() {
             <Button variant="outline" size="lg" asChild>
               <Link href="/about">Learn More</Link>
             </Button>
+            <Button variant="outline" size="lg" asChild>
+              <a href="https://sphelps.substack.com/p/science-has-a-slop-problem-ai-didnt" target="_blank" rel="noopener noreferrer">
+                Read the Manifesto
+              </a>
+            </Button>
           </div>
         </div>
       </section>
